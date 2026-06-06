@@ -46,6 +46,30 @@ const books = [
         genre: "Фантастика",
         cover: "science",
         description: "Приключенческий роман о группе людей, оказавшихся на необитаемом острове. Герои используют знания и изобретательность, чтобы выжить и обустроить жизнь."
+    },
+    {
+        id: 7,
+        title: "Робинзон Крузо",
+        author: "Даниэль Дефо",
+        genre: "Приключения",
+        cover: "adventure",
+        description: "Роман о моряке, который после кораблекрушения оказывается на необитаемом острове. Герой учится выживать, строить быт и не терять надежду."
+    },
+    {
+        id: 8,
+        title: "Гордость и предубеждение",
+        author: "Джейн Остин",
+        genre: "Роман",
+        cover: "novel",
+        description: "Классический роман о семье, воспитании, личном выборе и отношениях между людьми. В центре сюжета находится история Элизабет Беннет."
+    },
+    {
+        id: 9,
+        title: "Хоббит",
+        author: "Джон Р. Р. Толкин",
+        genre: "Фэнтези",
+        cover: "fantasy",
+        description: "История о путешествии Бильбо Бэггинса, который отправляется в опасное приключение вместе с гномами. Книга знакомит читателя с волшебным миром Средиземья."
     }
 ];
 
@@ -56,6 +80,7 @@ let activeBookId = null;
 const booksGrid = document.getElementById("booksGrid");
 const searchInput = document.getElementById("searchInput");
 const genreSelect = document.getElementById("genreSelect");
+const genreButtons = document.getElementById("genreButtons");
 const booksCount = document.getElementById("booksCount");
 const selectedCount = document.getElementById("selectedCount");
 const selectedList = document.getElementById("selectedList");
@@ -111,10 +136,52 @@ function getFilteredBooks() {
     });
 }
 
+function getCoverByGenre(genre) {
+    if (genre === "Детектив") {
+        return "detective";
+    }
+
+    if (genre === "Учебная") {
+        return "study";
+    }
+
+    if (genre === "Фантастика") {
+        return "science";
+    }
+
+    if (genre === "Приключения") {
+        return "adventure";
+    }
+
+    if (genre === "Роман") {
+        return "novel";
+    }
+
+    if (genre === "Фэнтези") {
+        return "fantasy";
+    }
+
+    return "classic";
+}
+
+function renderGenreButtons() {
+    genreButtons.innerHTML = "";
+
+    Array.from(genreSelect.options).forEach((option) => {
+        const button = document.createElement("button");
+        button.className = `genre-filter ${option.value === genreSelect.value ? "active" : ""}`;
+        button.type = "button";
+        button.dataset.genre = option.value;
+        button.textContent = option.textContent;
+        genreButtons.appendChild(button);
+    });
+}
+
 function renderBooks() {
     const filteredBooks = getFilteredBooks();
 
     booksGrid.innerHTML = "";
+    renderGenreButtons();
     booksCount.textContent = `${filteredBooks.length} ${getBooksWord(filteredBooks.length)}`;
     emptyMessage.classList.toggle("show", filteredBooks.length === 0);
 
@@ -260,6 +327,17 @@ selectedList.addEventListener("click", (event) => {
 searchInput.addEventListener("input", renderBooks);
 genreSelect.addEventListener("change", renderBooks);
 
+genreButtons.addEventListener("click", (event) => {
+    const button = event.target.closest("button");
+
+    if (!button) {
+        return;
+    }
+
+    genreSelect.value = button.dataset.genre;
+    renderBooks();
+});
+
 addBookForm.addEventListener("submit", (event) => {
     event.preventDefault();
 
@@ -268,7 +346,7 @@ addBookForm.addEventListener("submit", (event) => {
         title: newTitle.value.trim(),
         author: newAuthor.value.trim(),
         genre: newGenre.value,
-        cover: newGenre.value === "Детектив" ? "detective" : newGenre.value === "Учебная" ? "study" : newGenre.value === "Фантастика" ? "science" : "classic",
+        cover: getCoverByGenre(newGenre.value),
         description: "Пользовательская книга, добавленная через форму каталога. Описание можно уточнить при дальнейшем развитии приложения."
     };
 

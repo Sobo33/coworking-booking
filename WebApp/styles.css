@@ -114,6 +114,34 @@ body {
     margin-bottom: 20px;
 }
 
+.genre-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 20px;
+}
+
+.genre-filter {
+    min-height: 34px;
+    border: 1px solid #cfc7bb;
+    border-radius: 18px;
+    padding: 0 12px;
+    font: inherit;
+    color: #314d43;
+    background: #fffdf9;
+    cursor: pointer;
+}
+
+.genre-filter:hover {
+    background: #edf4ef;
+}
+
+.genre-filter.active {
+    border-color: #314d43;
+    color: #ffffff;
+    background: #314d43;
+}
+
 .field {
     display: grid;
     gap: 7px;
@@ -176,6 +204,18 @@ select:focus {
 
 .cover.study {
     background: linear-gradient(135deg, #4f6f52, #9cae73);
+}
+
+.cover.adventure {
+    background: linear-gradient(135deg, #7a5532, #d2a24d);
+}
+
+.cover.novel {
+    background: linear-gradient(135deg, #7b4b5d, #d29aa7);
+}
+
+.cover.fantasy {
+    background: linear-gradient(135deg, #39456f, #8e78bd);
 }
 
 .cover-title {
@@ -436,7 +476,8 @@ body.dark-theme .modal-card {
 
 body.dark-theme .book-card,
 body.dark-theme .selected-list li,
-body.dark-theme .rating-button {
+body.dark-theme .rating-button,
+body.dark-theme .genre-filter {
     border-color: #35443e;
     background: #1d2522;
 }
@@ -466,6 +507,20 @@ body.dark-theme .details-button,
 body.dark-theme .book-info button.added {
     color: #dce9df !important;
     background: #30443b !important;
+}
+
+body.dark-theme .genre-filter {
+    color: #dce9df;
+}
+
+body.dark-theme .genre-filter:hover {
+    background: #30443b;
+}
+
+body.dark-theme .genre-filter.active {
+    border-color: #83a792;
+    color: #111816;
+    background: #83a792;
 }
 
 body.dark-theme .details-button:hover {
