@@ -99,6 +99,10 @@ const modalGenre = document.getElementById("modalGenre");
 const modalTitle = document.getElementById("modalTitle");
 const modalAuthor = document.getElementById("modalAuthor");
 const modalDescription = document.getElementById("modalDescription");
+const editBookBlock = document.getElementById("editBookBlock");
+const editDescription = document.getElementById("editDescription");
+const saveDescription = document.getElementById("saveDescription");
+const deleteBook = document.getElementById("deleteBook");
 const ratingButtons = document.getElementById("ratingButtons");
 const themeToggle = document.getElementById("themeToggle");
 
@@ -300,6 +304,8 @@ function openBookModal(bookId) {
     modalTitle.textContent = book.title;
     modalAuthor.textContent = book.author;
     modalDescription.textContent = book.description || "Описание для этой книги пока не добавлено.";
+    editDescription.value = book.description || "";
+    editBookBlock.classList.toggle("show", Boolean(book.userAdded));
     renderRatingButtons();
     bookModal.classList.add("show");
     bookModal.setAttribute("aria-hidden", "false");
@@ -391,7 +397,8 @@ addBookForm.addEventListener("submit", (event) => {
         author: newAuthor.value.trim(),
         genre: newGenre.value,
         cover: getCoverByGenre(newGenre.value),
-        description: "Пользовательская книга, добавленная через форму каталога. Описание можно уточнить при дальнейшем развитии приложения."
+        description: "Пользовательская книга, добавленная через форму каталога. Описание можно уточнить при дальнейшем развитии приложения.",
+        userAdded: true
     };
 
     books.push(book);
@@ -411,6 +418,34 @@ ratingButtons.addEventListener("click", (event) => {
 
     bookRatings[activeBookId] = Number(button.dataset.rating);
     renderRatingButtons();
+});
+
+saveDescription.addEventListener("click", () => {
+    const book = books.find((item) => item.id === activeBookId);
+
+    if (!book || !book.userAdded) {
+        return;
+    }
+
+    book.description = editDescription.value.trim() || "Описание для этой книги пока не добавлено.";
+    modalDescription.textContent = book.description;
+});
+
+deleteBook.addEventListener("click", () => {
+    const bookIndex = books.findIndex((item) => item.id === activeBookId);
+
+    if (bookIndex === -1 || !books[bookIndex].userAdded) {
+        return;
+    }
+
+    const bookId = books[bookIndex].id;
+    books.splice(bookIndex, 1);
+    selectedBooks = selectedBooks.filter((id) => id !== bookId);
+    favoriteBooks = favoriteBooks.filter((id) => id !== bookId);
+    delete bookRatings[bookId];
+
+    closeBookModal();
+    updatePage();
 });
 
 modalClose.addEventListener("click", closeBookModal);
