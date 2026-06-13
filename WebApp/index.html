@@ -3,127 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Онлайн-библиотека</title>
+    <title>Точка работы - бронирование коворкингов</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header class="top-header">
-        <div>
-            <p class="label">Курсовой проект</p>
-            <h1>Онлайн-библиотека</h1>
-        </div>
-        <div class="header-actions">
-            <p class="header-text">Простой веб-интерфейс для просмотра книг, поиска и формирования списка выбранного.</p>
-            <button class="theme-toggle" id="themeToggle" type="button">Темная тема</button>
-        </div>
+    <header class="site-header">
+        <a class="brand" href="#" aria-label="Точка работы">
+            <span class="brand-mark">Т</span>
+            <span>
+                <strong>Точка работы</strong>
+                <small>Коворкинги рядом</small>
+            </span>
+        </a>
+
+        <nav class="header-nav" aria-label="Основная навигация">
+            <a href="#spaces">Пространства</a>
+            <a href="#booking">Бронирование</a>
+        </nav>
+
+        <button class="theme-button" id="themeButton" type="button">Тёмная тема</button>
     </header>
 
-    <main class="layout">
-        <section class="catalog-section" aria-labelledby="catalog-title">
-            <div class="panel-head">
+    <main>
+        <section class="search-section" aria-labelledby="pageTitle">
+            <div class="search-heading">
                 <div>
-                    <p class="label">Каталог</p>
-                    <h2 id="catalog-title">Список книг</h2>
+                    <p class="eyebrow">Бронирование рабочего пространства</p>
+                    <h1 id="pageTitle">Найдите место для работы</h1>
                 </div>
-                <span class="counter" id="booksCount">0 книг</span>
+                <p>Выберите подходящий коворкинг, дату и время. Стоимость рассчитывается автоматически.</p>
             </div>
 
-            <div class="catalog-tabs" id="viewTabs" aria-label="Вкладки каталога">
-                <button class="catalog-tab active" type="button" data-view="all">Все книги</button>
-                <button class="catalog-tab" type="button" data-view="favorites">Избранное</button>
-            </div>
-
-            <form class="filters" id="filtersForm">
-                <label class="field">
-                    <span>Поиск</span>
-                    <input type="search" id="searchInput" placeholder="Название или автор">
+            <form class="search-form" id="searchForm">
+                <label class="field search-field">
+                    <span>Название или район</span>
+                    <input id="searchInput" type="search" placeholder="Например, Арбат">
                 </label>
 
                 <label class="field">
-                    <span>Жанр</span>
-                    <select id="genreSelect">
-                        <option value="all">Все жанры</option>
-                        <option value="Классика">Классика</option>
-                        <option value="Фантастика">Фантастика</option>
-                        <option value="Детектив">Детектив</option>
-                        <option value="Учебная">Учебная</option>
-                        <option value="Приключения">Приключения</option>
-                        <option value="Роман">Роман</option>
-                        <option value="Фэнтези">Фэнтези</option>
+                    <span>Дата</span>
+                    <input id="searchDate" type="date">
+                </label>
+
+                <label class="field">
+                    <span>Гостей</span>
+                    <select id="guestFilter">
+                        <option value="1">1 человек</option>
+                        <option value="2">2 человека</option>
+                        <option value="4">До 4 человек</option>
+                        <option value="6">До 6 человек</option>
+                        <option value="10">До 10 человек</option>
                     </select>
                 </label>
+
+                <button class="primary-button search-button" type="submit">Найти</button>
             </form>
-
-            <div class="genre-buttons" id="genreButtons" aria-label="Быстрый фильтр по жанрам"></div>
-
-            <div class="books-grid" id="booksGrid"></div>
-            <p class="empty-message" id="emptyMessage">Книги не найдены.</p>
         </section>
 
-        <aside class="side-panel" aria-labelledby="selected-title">
-            <div class="panel-head">
-                <div>
-                    <p class="label">Выбор читателя</p>
-                    <h2 id="selected-title">Мои книги</h2>
+        <div class="page-layout">
+            <section class="results-section" id="spaces" aria-labelledby="resultsTitle">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">Доступные варианты</p>
+                        <h2 id="resultsTitle">Коворкинги Москвы</h2>
+                    </div>
+                    <span class="result-count" id="resultCount">0 вариантов</span>
                 </div>
-                <span class="counter" id="selectedCount">0</span>
-            </div>
 
-            <ul class="selected-list" id="selectedList"></ul>
-            <p class="side-note" id="selectedEmpty">Добавьте книгу из каталога.</p>
+                <div class="type-filters" id="typeFilters" aria-label="Фильтр по типу пространства">
+                    <button class="filter-button active" type="button" data-type="all">Все</button>
+                    <button class="filter-button" type="button" data-type="open">Открытое место</button>
+                    <button class="filter-button" type="button" data-type="office">Кабинет</button>
+                    <button class="filter-button" type="button" data-type="meeting">Переговорная</button>
+                </div>
 
-            <form class="add-form" id="addBookForm">
-                <h3>Добавить книгу</h3>
-                <label class="field">
-                    <span>Название</span>
-                    <input type="text" id="newTitle" required>
-                </label>
-                <label class="field">
-                    <span>Автор</span>
-                    <input type="text" id="newAuthor" required>
-                </label>
-                <label class="field">
-                    <span>Жанр</span>
-                    <select id="newGenre">
-                        <option>Классика</option>
-                        <option>Фантастика</option>
-                        <option>Детектив</option>
-                        <option>Учебная</option>
-                        <option>Приключения</option>
-                        <option>Роман</option>
-                        <option>Фэнтези</option>
-                    </select>
-                </label>
-                <button class="primary-button" type="submit">Добавить в каталог</button>
-            </form>
-        </aside>
+                <div class="space-grid" id="spaceGrid"></div>
+                <p class="empty-state" id="emptyState">Подходящие пространства не найдены.</p>
+            </section>
+
+            <aside class="booking-panel" id="booking" aria-labelledby="bookingTitle">
+                <div class="panel-heading">
+                    <p class="eyebrow">Ваш выбор</p>
+                    <h2 id="bookingTitle">Бронирование</h2>
+                </div>
+
+                <div class="selected-placeholder" id="selectedPlaceholder">
+                    <strong>Пространство не выбрано</strong>
+                    <p>Нажмите «Выбрать» на подходящей карточке.</p>
+                </div>
+
+                <div class="selected-space" id="selectedSpace" hidden>
+                    <img id="selectedImage" alt="">
+                    <div>
+                        <span id="selectedType"></span>
+                        <strong id="selectedName"></strong>
+                        <small id="selectedAddress"></small>
+                    </div>
+                </div>
+
+                <form class="booking-form" id="bookingForm">
+                    <label class="field">
+                        <span>Дата</span>
+                        <input id="bookingDate" type="date" required>
+                    </label>
+
+                    <div class="form-row">
+                        <label class="field">
+                            <span>Начало</span>
+                            <select id="bookingTime">
+                                <option>09:00</option>
+                                <option>10:00</option>
+                                <option>11:00</option>
+                                <option>12:00</option>
+                                <option>13:00</option>
+                                <option>14:00</option>
+                                <option>15:00</option>
+                                <option>16:00</option>
+                                <option>17:00</option>
+                                <option>18:00</option>
+                            </select>
+                        </label>
+
+                        <label class="field">
+                            <span>Часов</span>
+                            <select id="bookingDuration">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="6">6</option>
+                                <option value="8">8</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <label class="field">
+                        <span>Количество гостей</span>
+                        <input id="bookingGuests" type="number" min="1" value="1" required>
+                    </label>
+
+                    <div class="price-summary">
+                        <span>Итого</span>
+                        <strong id="totalPrice">0 ₽</strong>
+                    </div>
+
+                    <p class="form-message" id="formMessage"></p>
+                    <button class="primary-button booking-button" type="submit" disabled>Забронировать</button>
+                </form>
+
+                <section class="booking-history" aria-labelledby="historyTitle">
+                    <div class="history-heading">
+                        <h3 id="historyTitle">Мои бронирования</h3>
+                        <span id="historyCount">0</span>
+                    </div>
+                    <ul id="bookingList"></ul>
+                    <p id="bookingEmpty">Здесь появятся оформленные бронирования.</p>
+                </section>
+            </aside>
+        </div>
     </main>
 
-    <div class="modal" id="bookModal" aria-hidden="true">
-        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-            <button class="modal-close" id="modalClose" type="button" aria-label="Закрыть">x</button>
-            <p class="label" id="modalGenre">Жанр</p>
-            <h2 id="modalTitle">Название книги</h2>
-            <p class="modal-author" id="modalAuthor">Автор</p>
-            <p class="modal-description" id="modalDescription">Описание книги.</p>
-
-            <div class="edit-book-block" id="editBookBlock">
-                <label class="field">
-                    <span>Редактировать описание</span>
-                    <textarea id="editDescription" rows="4"></textarea>
-                </label>
-                <div class="edit-actions">
-                    <button class="primary-button" id="saveDescription" type="button">Сохранить</button>
-                    <button class="delete-book-button" id="deleteBook" type="button">Удалить книгу</button>
-                </div>
+    <div class="modal" id="spaceModal" aria-hidden="true">
+        <article class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <button class="modal-close" id="modalClose" type="button" aria-label="Закрыть">×</button>
+            <img id="modalImage" alt="">
+            <div class="modal-content">
+                <p class="eyebrow" id="modalType"></p>
+                <h2 id="modalTitle"></h2>
+                <p class="modal-address" id="modalAddress"></p>
+                <p id="modalDescription"></p>
+                <div class="amenities" id="modalAmenities"></div>
+                <button class="primary-button" id="modalSelect" type="button">Выбрать пространство</button>
             </div>
-
-            <div class="rating-block">
-                <span>Оценка:</span>
-                <div class="rating-buttons" id="ratingButtons"></div>
-            </div>
-        </div>
+        </article>
     </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <script src="script.js"></script>
 </body>
