@@ -645,8 +645,28 @@ select:focus {
     display: block;
 }
 
-.booking-button {
+.booking-form-actions {
+    display: grid;
+    gap: 8px;
+}
+
+.booking-button,
+.cancel-edit-button {
     width: 100%;
+}
+
+.cancel-edit-button {
+    min-height: 40px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--text);
+    background: var(--surface);
+    font-weight: 800;
+}
+
+.cancel-edit-button:hover {
+    border-color: var(--primary);
+    color: var(--primary);
 }
 
 .booking-history {
@@ -670,10 +690,15 @@ select:focus {
 
 .booking-history li {
     position: relative;
-    padding: 11px 36px 11px 11px;
+    padding: 11px 70px 11px 11px;
     border: 1px solid var(--line);
     border-radius: 6px;
     background: var(--surface-soft);
+}
+
+.booking-history li.editing {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 16%, transparent);
 }
 
 .booking-history strong,
@@ -692,17 +717,27 @@ select:focus {
     line-height: 1.35;
 }
 
+.edit-booking,
 .cancel-booking {
     position: absolute;
     top: 9px;
-    right: 9px;
     width: 25px;
     height: 25px;
     border: 0;
     border-radius: 4px;
+    font-weight: 800;
+}
+
+.edit-booking {
+    right: 39px;
+    color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 14%, var(--surface));
+}
+
+.cancel-booking {
+    right: 9px;
     color: var(--warning);
     background: var(--accent-soft);
-    font-weight: 800;
 }
 
 #bookingEmpty {

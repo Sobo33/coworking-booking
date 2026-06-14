@@ -90,6 +90,7 @@ const state = {
     activeView: "all",
     selectedSpaceId: null,
     modalSpaceId: null,
+    editingBookingId: null,
     favoriteSpaces: loadFavorites(),
     bookings: loadBookings()
 };
@@ -117,6 +118,7 @@ const bookingGuests = document.getElementById("bookingGuests");
 const totalPrice = document.getElementById("totalPrice");
 const formMessage = document.getElementById("formMessage");
 const bookingButton = bookingForm.querySelector(".booking-button");
+const cancelEditButton = document.getElementById("cancelEditButton");
 const bookingList = document.getElementById("bookingList");
 const bookingEmpty = document.getElementById("bookingEmpty");
 const historyCount = document.getElementById("historyCount");
@@ -292,6 +294,34 @@ function clearFormMessage() {
     formMessage.classList.remove("show");
 }
 
+function finishEditing() {
+    state.editingBookingId = null;
+    bookingButton.textContent = "Забронировать";
+    cancelEditButton.hidden = true;
+    clearFormMessage();
+    renderBookings();
+}
+
+function startEditing(bookingId) {
+    const booking = state.bookings.find((item) => item.id === bookingId);
+
+    if (!booking) {
+        return;
+    }
+
+    state.editingBookingId = bookingId;
+    selectSpace(booking.spaceId);
+    bookingDate.value = booking.date;
+    bookingTime.value = booking.time;
+    bookingDuration.value = String(booking.duration);
+    bookingGuests.value = booking.guests;
+    bookingButton.textContent = "Сохранить изменения";
+    cancelEditButton.hidden = false;
+    updateTotal();
+    renderBookings();
+    document.getElementById("booking").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function renderBookings() {
     bookingList.innerHTML = "";
     historyCount.textContent = state.bookings.length;
@@ -299,10 +329,12 @@ function renderBookings() {
 
     state.bookings.forEach((booking) => {
         const item = document.createElement("li");
+        item.classList.toggle("editing", booking.id === state.editingBookingId);
         item.innerHTML = `
             <strong>${booking.spaceName}</strong>
             <span>${formatDate(booking.date)}, ${booking.time} · ${booking.duration} ч. · ${formatPrice(booking.total)}</span>
-            <button class="cancel-booking" type="button" data-id="${booking.id}" aria-label="Отменить бронирование">×</button>
+            <button class="edit-booking" type="button" data-action="edit" data-id="${booking.id}" aria-label="Редактировать бронирование">✎</button>
+            <button class="cancel-booking" type="button" data-action="delete" data-id="${booking.id}" aria-label="Отменить бронирование">×</button>
         `;
         bookingList.appendChild(item);
     });
@@ -454,8 +486,7 @@ bookingForm.addEventListener("submit", (event) => {
     }
 
     const duration = Number(bookingDuration.value);
-    const booking = {
-        id: Date.now(),
+    const bookingData = {
         spaceId: space.id,
         spaceName: space.name,
         date: bookingDate.value,
@@ -465,7 +496,26 @@ bookingForm.addEventListener("submit", (event) => {
         total: space.price * duration
     };
 
-    state.bookings.unshift(booking);
+    if (state.editingBookingId !== null) {
+        const bookingIndex = state.bookings.findIndex((item) => item.id === state.editingBookingId);
+
+        if (bookingIndex !== -1) {
+            state.bookings[bookingIndex] = {
+                ...state.bookings[bookingIndex],
+                ...bookingData
+            };
+        }
+
+        saveBookings();
+        finishEditing();
+        showToast("Изменения бронирования сохранены");
+        return;
+    }
+
+    state.bookings.unshift({
+        id: Date.now(),
+        ...bookingData
+    });
     saveBookings();
     renderBookings();
     clearFormMessage();
@@ -480,11 +530,24 @@ bookingList.addEventListener("click", (event) => {
     }
 
     const bookingId = Number(button.dataset.id);
+
+    if (button.dataset.action === "edit") {
+        startEditing(bookingId);
+        return;
+    }
+
     state.bookings = state.bookings.filter((booking) => booking.id !== bookingId);
+
+    if (state.editingBookingId === bookingId) {
+        finishEditing();
+    }
+
     saveBookings();
     renderBookings();
     showToast("Бронирование отменено");
 });
+
+cancelEditButton.addEventListener("click", finishEditing);
 
 modalClose.addEventListener("click", closeModal);
 
