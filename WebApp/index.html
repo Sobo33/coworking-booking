@@ -82,6 +82,37 @@
                     <button class="filter-button" type="button" data-type="meeting">Переговорная</button>
                 </div>
 
+                <div class="amenity-filter">
+                    <span class="filter-label">Удобства</span>
+                    <div class="amenity-options" id="amenityFilters" aria-label="Фильтр по удобствам">
+                        <label class="amenity-option">
+                            <input type="checkbox" value="Wi-Fi">
+                            <span>Wi-Fi</span>
+                        </label>
+                        <label class="amenity-option">
+                            <input type="checkbox" value="Кофе">
+                            <span>Кофе</span>
+                        </label>
+                        <label class="amenity-option">
+                            <input type="checkbox" value="Монитор">
+                            <span>Монитор</span>
+                        </label>
+                        <label class="amenity-option">
+                            <input type="checkbox" value="Экран">
+                            <span>Экран</span>
+                        </label>
+                        <label class="amenity-option">
+                            <input type="checkbox" value="Кухня">
+                            <span>Кухня</span>
+                        </label>
+                        <label class="amenity-option">
+                            <input type="checkbox" value="Видеосвязь">
+                            <span>Видеосвязь</span>
+                        </label>
+                        <button class="reset-amenities" id="resetAmenities" type="button" hidden>Сбросить</button>
+                    </div>
+                </div>
+
                 <div class="space-grid" id="spaceGrid"></div>
                 <p class="empty-state" id="emptyState">Подходящие пространства не найдены.</p>
             </section>

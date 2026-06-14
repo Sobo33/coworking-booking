@@ -306,7 +306,7 @@ select:focus {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin-bottom: 18px;
+    margin-bottom: 14px;
 }
 
 .filter-button {
@@ -327,6 +327,70 @@ select:focus {
     color: #ffffff;
     border-color: var(--primary);
     background: var(--primary);
+}
+
+.amenity-filter {
+    margin-bottom: 18px;
+}
+
+.filter-label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.amenity-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.amenity-option {
+    position: relative;
+    cursor: pointer;
+}
+
+.amenity-option input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.amenity-option span,
+.reset-amenities {
+    display: inline-flex;
+    min-height: 34px;
+    align-items: center;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: 0 11px;
+    color: var(--muted);
+    background: var(--surface);
+    font-size: 14px;
+}
+
+.amenity-option:hover span,
+.amenity-option input:focus-visible + span {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.amenity-option input:checked + span {
+    color: var(--primary);
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 12%, var(--surface));
+    font-weight: 800;
+}
+
+.reset-amenities {
+    color: var(--warning);
+}
+
+.reset-amenities:hover {
+    border-color: var(--warning);
 }
 
 .space-grid {

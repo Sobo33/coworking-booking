@@ -88,6 +88,7 @@ const spaces = [
 const state = {
     activeType: "all",
     activeView: "all",
+    activeAmenities: [],
     selectedSpaceId: null,
     modalSpaceId: null,
     editingBookingId: null,
@@ -100,6 +101,8 @@ const resultCount = document.getElementById("resultCount");
 const emptyState = document.getElementById("emptyState");
 const catalogTabs = document.getElementById("catalogTabs");
 const typeFilters = document.getElementById("typeFilters");
+const amenityFilters = document.getElementById("amenityFilters");
+const resetAmenities = document.getElementById("resetAmenities");
 const searchForm = document.getElementById("searchForm");
 const searchInput = document.getElementById("searchInput");
 const searchDate = document.getElementById("searchDate");
@@ -173,6 +176,18 @@ function formatDate(value) {
     });
 }
 
+function formatResultCount(count) {
+    if (count % 10 === 1 && count % 100 !== 11) {
+        return `${count} вариант`;
+    }
+
+    if ([2, 3, 4].includes(count % 10) && ![12, 13, 14].includes(count % 100)) {
+        return `${count} варианта`;
+    }
+
+    return `${count} вариантов`;
+}
+
 function getFilteredSpaces() {
     const query = searchInput.value.trim().toLowerCase();
     const guests = Number(guestFilter.value);
@@ -181,11 +196,14 @@ function getFilteredSpaces() {
         const matchesType = state.activeType === "all" || space.type === state.activeType;
         const matchesGuests = space.capacity >= guests;
         const matchesView = state.activeView === "all" || state.favoriteSpaces.includes(space.id);
+        const matchesAmenities = state.activeAmenities.every((amenity) => {
+            return space.features.includes(amenity);
+        });
         const matchesQuery = space.name.toLowerCase().includes(query)
             || space.address.toLowerCase().includes(query)
             || space.district.toLowerCase().includes(query);
 
-        return matchesType && matchesGuests && matchesView && matchesQuery;
+        return matchesType && matchesGuests && matchesView && matchesAmenities && matchesQuery;
     });
 }
 
@@ -204,7 +222,7 @@ function renderSpaces() {
 
     spaceGrid.innerHTML = "";
     renderCatalogTabs();
-    resultCount.textContent = `${filteredSpaces.length} вариантов`;
+    resultCount.textContent = formatResultCount(filteredSpaces.length);
     emptyState.textContent = state.activeView === "favorites"
         ? "В избранном пока нет подходящих пространств."
         : "Подходящие пространства не найдены.";
@@ -395,6 +413,24 @@ typeFilters.addEventListener("click", (event) => {
     typeFilters.querySelectorAll("button").forEach((item) => {
         item.classList.toggle("active", item === button);
     });
+    renderSpaces();
+});
+
+amenityFilters.addEventListener("change", () => {
+    state.activeAmenities = Array.from(
+        amenityFilters.querySelectorAll('input[type="checkbox"]:checked'),
+        (input) => input.value
+    );
+    resetAmenities.hidden = state.activeAmenities.length === 0;
+    renderSpaces();
+});
+
+resetAmenities.addEventListener("click", () => {
+    amenityFilters.querySelectorAll('input[type="checkbox"]').forEach((input) => {
+        input.checked = false;
+    });
+    state.activeAmenities = [];
+    resetAmenities.hidden = true;
     renderSpaces();
 });
 
