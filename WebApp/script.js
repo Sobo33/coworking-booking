@@ -94,6 +94,7 @@ const state = {
     selectedSpaceId: null,
     modalSpaceId: null,
     editingBookingId: null,
+    editingSpaceId: null,
     favoriteSpaces: loadFavorites(),
     bookings: loadBookings()
 };
@@ -141,6 +142,9 @@ const modalSelect = document.getElementById("modalSelect");
 const addSpaceModal = document.getElementById("addSpaceModal");
 const addSpaceClose = document.getElementById("addSpaceClose");
 const addSpaceForm = document.getElementById("addSpaceForm");
+const addSpaceEyebrow = document.getElementById("addSpaceEyebrow");
+const addSpaceTitle = document.getElementById("addSpaceTitle");
+const addSpaceSubmit = document.getElementById("addSpaceSubmit");
 const newSpaceName = document.getElementById("newSpaceName");
 const newSpaceType = document.getElementById("newSpaceType");
 const newSpaceCapacity = document.getElementById("newSpaceCapacity");
@@ -274,6 +278,16 @@ function renderSpaces() {
             <div class="space-image">
                 <img src="${space.image}" alt="${safeName}">
                 <span class="availability">Свободно</span>
+                ${space.isCustom ? `
+                    <div class="custom-space-actions">
+                        <button class="custom-space-button edit-space-button" type="button"
+                            data-action="edit-space" data-id="${space.id}"
+                            aria-label="Редактировать коворкинг" title="Редактировать коворкинг">✎</button>
+                        <button class="custom-space-button delete-space-button" type="button"
+                            data-action="delete-space" data-id="${space.id}"
+                            aria-label="Удалить коворкинг" title="Удалить коворкинг">×</button>
+                    </div>
+                ` : ""}
                 <button class="favorite-button ${isFavorite ? "active" : ""}" type="button"
                     data-action="favorite" data-id="${space.id}"
                     aria-label="${isFavorite ? "Убрать из избранного" : "Добавить в избранное"}">
@@ -424,7 +438,33 @@ function closeModal() {
     state.modalSpaceId = null;
 }
 
-function openAddSpaceModal() {
+function resetAddSpaceForm() {
+    addSpaceForm.reset();
+    newSpaceCapacity.value = "1";
+    newSpacePrice.value = "500";
+}
+
+function openAddSpaceModal(spaceId = null) {
+    const space = spaces.find((item) => item.id === spaceId && item.isCustom);
+
+    resetAddSpaceForm();
+    state.editingSpaceId = space ? space.id : null;
+    addSpaceEyebrow.textContent = space ? "Редактирование пространства" : "Новое пространство";
+    addSpaceTitle.textContent = space ? "Изменить коворкинг" : "Добавить коворкинг";
+    addSpaceSubmit.textContent = space ? "Сохранить изменения" : "Добавить коворкинг";
+
+    if (space) {
+        newSpaceName.value = space.name;
+        newSpaceType.value = space.type;
+        newSpaceCapacity.value = space.capacity;
+        newSpaceAddress.value = space.address;
+        newSpacePrice.value = space.price;
+        newSpaceDescription.value = space.description;
+        addSpaceForm.querySelectorAll('input[name="newAmenity"]').forEach((input) => {
+            input.checked = space.features.includes(input.value);
+        });
+    }
+
     addSpaceModal.classList.add("show");
     addSpaceModal.setAttribute("aria-hidden", "false");
     newSpaceName.focus();
@@ -433,6 +473,58 @@ function openAddSpaceModal() {
 function closeAddSpaceModal() {
     addSpaceModal.classList.remove("show");
     addSpaceModal.setAttribute("aria-hidden", "true");
+    state.editingSpaceId = null;
+}
+
+function clearSelectedSpace() {
+    state.selectedSpaceId = null;
+    state.editingBookingId = null;
+    selectedPlaceholder.hidden = false;
+    selectedSpace.hidden = true;
+    selectedImage.removeAttribute("src");
+    bookingGuests.removeAttribute("max");
+    bookingButton.disabled = true;
+    bookingButton.textContent = "Забронировать";
+    cancelEditButton.hidden = true;
+    totalPrice.textContent = formatPrice(0);
+    clearFormMessage();
+}
+
+function deleteCustomSpace(spaceId) {
+    const spaceIndex = spaces.findIndex((space) => space.id === spaceId && space.isCustom);
+
+    if (spaceIndex === -1) {
+        return;
+    }
+
+    const space = spaces[spaceIndex];
+    const relatedBookings = state.bookings.filter((booking) => booking.spaceId === spaceId).length;
+    const bookingWarning = relatedBookings > 0
+        ? ` Связанные бронирования (${relatedBookings}) также будут удалены.`
+        : "";
+
+    if (!window.confirm(`Удалить коворкинг «${space.name}»?${bookingWarning}`)) {
+        return;
+    }
+
+    spaces.splice(spaceIndex, 1);
+    state.favoriteSpaces = state.favoriteSpaces.filter((id) => id !== spaceId);
+    state.bookings = state.bookings.filter((booking) => booking.spaceId !== spaceId);
+
+    if (state.selectedSpaceId === spaceId) {
+        clearSelectedSpace();
+    }
+
+    if (state.modalSpaceId === spaceId) {
+        closeModal();
+    }
+
+    saveUserSpaces();
+    saveFavorites();
+    saveBookings();
+    renderBookings();
+    renderSpaces();
+    showToast(`Коворкинг «${space.name}» удалён`);
 }
 
 function resetCatalogFilters() {
@@ -528,6 +620,16 @@ spaceGrid.addEventListener("click", (event) => {
     }
 
     const spaceId = Number(button.dataset.id);
+
+    if (button.dataset.action === "edit-space") {
+        openAddSpaceModal(spaceId);
+        return;
+    }
+
+    if (button.dataset.action === "delete-space") {
+        deleteCustomSpace(spaceId);
+        return;
+    }
 
     if (button.dataset.action === "details") {
         openModal(spaceId);
@@ -649,7 +751,7 @@ bookingList.addEventListener("click", (event) => {
 
 cancelEditButton.addEventListener("click", finishEditing);
 
-openAddSpace.addEventListener("click", openAddSpaceModal);
+openAddSpace.addEventListener("click", () => openAddSpaceModal());
 addSpaceClose.addEventListener("click", closeAddSpaceModal);
 
 addSpaceModal.addEventListener("click", (event) => {
@@ -680,8 +782,7 @@ addSpaceForm.addEventListener("submit", (event) => {
         addSpaceForm.querySelectorAll('input[name="newAmenity"]:checked'),
         (input) => input.value
     );
-    const newSpace = {
-        id: Date.now(),
+    const spaceData = {
         name: newSpaceName.value.trim(),
         type: newSpaceType.value,
         typeLabel: selectedType.label,
@@ -695,13 +796,47 @@ addSpaceForm.addEventListener("submit", (event) => {
         description: newSpaceDescription.value.trim(),
         isCustom: true
     };
+    const editingSpace = spaces.find((space) => {
+        return space.id === state.editingSpaceId && space.isCustom;
+    });
+
+    if (editingSpace) {
+        Object.assign(editingSpace, spaceData);
+        state.bookings = state.bookings.map((booking) => {
+            if (booking.spaceId !== editingSpace.id) {
+                return booking;
+            }
+
+            return {
+                ...booking,
+                spaceName: editingSpace.name,
+                total: editingSpace.price * booking.duration
+            };
+        });
+        saveUserSpaces();
+        saveBookings();
+        closeAddSpaceModal();
+        renderBookings();
+
+        if (state.selectedSpaceId === editingSpace.id) {
+            selectSpace(editingSpace.id);
+        } else {
+            renderSpaces();
+        }
+
+        showToast(`Коворкинг «${editingSpace.name}» изменён`);
+        return;
+    }
+
+    const newSpace = {
+        id: Date.now(),
+        ...spaceData
+    };
 
     spaces.unshift(newSpace);
     saveUserSpaces();
     resetCatalogFilters();
-    addSpaceForm.reset();
-    newSpaceCapacity.value = "1";
-    newSpacePrice.value = "500";
+    resetAddSpaceForm();
     closeAddSpaceModal();
     renderSpaces();
     showToast(`Коворкинг «${newSpace.name}» добавлен`);
